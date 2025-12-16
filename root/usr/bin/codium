@@ -1,7 +1,0 @@
-#! /bin/bash
-
-BIN=/usr/share/codium/bin/codium
-
-dbus-launch ${BIN} \
-  --no-sandbox \
-   "$@"

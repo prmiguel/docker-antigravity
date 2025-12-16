@@ -15,38 +15,41 @@ ENV TITLE=VSCodium
 RUN \
   echo "**** add icon ****" && \
   curl -o \
-    /usr/share/selkies/www/icon.png \
-    https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/vscodium-icon.png && \
+  /usr/share/selkies/www/icon.png \
+  https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/vscodium-icon.png && \
   echo "**** install packages ****" && \
   apt-get update && \
   apt-get install --no-install-recommends -y \
-    caja \
-    chromium \
-    chromium-l10n \
-    git \
-    gnome-keyring \
-    ssh-askpass \
-    stterm && \
+  caja \
+  chromium \
+  chromium-l10n \
+  git \
+  gnome-keyring \
+  ssh-askpass \
+  stterm && \
   echo "**** install codium ****" && \
-  if [ -z ${CODIUM_VERSION+x} ]; then \
-    CODIUM_VERSION=$(curl -sX GET "https://api.github.com/repos/VSCodium/vscodium/releases/latest" \
-    | awk '/tag_name/{print $4;exit}' FS='[""]'); \
-  fi && \
-  curl -o \
-    /tmp/codium.deb -L \
-    "https://github.com/VSCodium/vscodium/releases/download/${CODIUM_VERSION}/codium_${CODIUM_VERSION}_amd64.deb" && \
-  apt install --no-install-recommends -y /tmp/codium.deb && \
+  mkdir -p /etc/apt/keyrings && \
+  curl -fsSL https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg | \
+  gpg --dearmor --yes -o /etc/apt/keyrings/antigravity-repo-key.gpg && \
+  echo "deb [signed-by=/etc/apt/keyrings/antigravity-repo-key.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ antigravity-debian main" | \
+  tee /etc/apt/sources.list.d/antigravity.list > /dev/null && \
+  apt-get update && \
+  apt-get install --no-install-recommends -y \
+  antigravity && \
   echo "**** container tweaks ****" && \
   mv \
-    /usr/bin/chromium \
-    /usr/bin/chromium-real && \
+  /usr/bin/chromium \
+  /usr/bin/chromium-real && \
+  mv \
+  /usr/bin/antigravity \
+  /usr/bin/antigravity-real && \
   printf "Linuxserver.io version: ${VERSION}\nBuild-date: ${BUILD_DATE}" > /build_version && \
   echo "**** cleanup ****" && \
   apt-get autoclean && \
   rm -rf \
-    /var/lib/apt/lists/* \
-    /var/tmp/* \
-    /tmp/*
+  /var/lib/apt/lists/* \
+  /var/tmp/* \
+  /tmp/*
 
 # add local files
 COPY /root /
